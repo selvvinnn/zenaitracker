@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { db } from '@/lib/supabase';
-import { motion } from 'framer-motion';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, parseISO } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import CalendarGrid from './CalendarGrid';
 import DailyNotes from './DailyNotes';
 import MonthlyAnalytics from './MonthlyAnalytics';

@@ -9,7 +9,7 @@ interface GamificationState {
   calculateRewards: () => void;
 }
 
-export const useGamificationStore = create<GamificationState>((set) => ({
+export const useGamificationStore = create<GamificationState>((_) => ({
   checkLevelUp: async (newXP: number, currentLevel: number) => {
     const xpForNextLevel = calculateXPForLevel(currentLevel + 1);
     if (newXP >= xpForNextLevel) {

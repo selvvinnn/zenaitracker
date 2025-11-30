@@ -15,7 +15,6 @@ export default function CalendarGrid({
   selectedDate,
   entries,
   onDateSelect,
-  loading,
 }: CalendarGridProps) {
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
