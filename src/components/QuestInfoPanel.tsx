@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { AlertTriangle, Clock, Trophy, CheckCircle2 } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 import { Quest } from '@/types';
 
 interface QuestInfoPanelProps {

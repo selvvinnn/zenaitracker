@@ -1,4 +1,4 @@
-import { useState, FormEvent, useEffect } from 'react';
+import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@/store/authStore';
@@ -9,69 +9,37 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const { signUp, loading, user, initialized } = useAuthStore();
+  const { signUp, loading } = useAuthStore();
   const navigate = useNavigate();
 
-  // Redirect if already logged in
-  useEffect(() => {
-    if (initialized && user) {
-      if (user.character.name === 'Hunter' && user.character.level === 1 && user.character.totalXP === 0) {
-        navigate('/character', { replace: true });
-      } else {
-        navigate('/dashboard', { replace: true });
-      }
-    }
-  }, [user, initialized, navigate]);
-
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    
-    if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
+  e.preventDefault();
 
-    if (password.length < 6) {
-      toast.error('Password must be at least 6 characters');
-      return;
-    }
+  if (password !== confirmPassword) {
+    toast.error("Passwords do not match");
+    return;
+  }
 
-    try {
-      await signUp(email, password);
-      
-      // Get updated user state after sign up
-      const updatedUser = useAuthStore.getState().user;
+  try {
+    await signUp(email, password);
 
-      toast.success('Account created! Create your character.');
-      
-      // Wait for state to update, then navigate
-      setTimeout(() => {
-        if (updatedUser) {
-          navigate('/character', { replace: true });
-        } else {
-          navigate('/character', { replace: true });
-        }
-      }, 100);
-    } catch (error: any) {
-      if (error.message === 'EMAIL_CONFIRMATION_REQUIRED') {
-        toast.success(
-          'Account created! Please check your email to confirm your account before signing in.',
-          { duration: 8000 }
-        );
-        // Optionally navigate to login or show a message
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
-      } else if (error.message === 'EMAIL_NOT_CONFIRMED') {
-        toast.error(
-          'Email not confirmed. Please check your email and click the confirmation link.',
-          { duration: 8000 }
-        );
-      } else {
-        toast.error(error.message || 'Failed to create account');
-      }
+    // If signup succeeded without requiring confirmation
+    toast.success("Account created! Check your email to confirm.");
+    navigate("/login");
+
+  } catch (error: any) {
+    if (error.message === "EMAIL_CONFIRMATION_REQUIRED") {
+      toast.success(
+        "Account created! Please check your email to confirm your account.",
+        { duration: 8000 }
+      );
+      navigate("/login");
+    } else {
+      toast.error(error.message || "Failed to create account");
     }
-  };
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">

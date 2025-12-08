@@ -9,7 +9,9 @@ import Dashboard from '@/pages/Dashboard';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import LoadingScreen from '@/components/LoadingScreen';
 import { AlertTriangle } from 'lucide-react';
+import HomePage from '@/pages/HomePage';
 import SettingsPage from '@/pages/SettingsPage';
+
 
 function App() {
   const { initialize, initialized } = useAuthStore();
@@ -156,6 +158,7 @@ function App() {
         }}
       />
       <Routes>
+        <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route
@@ -182,7 +185,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

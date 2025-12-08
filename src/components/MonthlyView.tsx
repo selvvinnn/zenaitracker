@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { db } from '@/lib/supabase';
+import { motion } from 'framer-motion';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 import CalendarGrid from './CalendarGrid';
 import DailyNotes from './DailyNotes';
@@ -15,74 +16,73 @@ export default function MonthlyView() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
-      loadEntries();
-    }
+    if (user) loadEntries();
   }, [user, currentDate]);
 
   const loadEntries = async () => {
     if (!user) return;
     try {
       setLoading(true);
-      const start = format(startOfMonth(currentDate), 'yyyy-MM-dd');
-      const end = format(endOfMonth(currentDate), 'yyyy-MM-dd');
+      const start = format(startOfMonth(currentDate), "yyyy-MM-dd");
+      const end = format(endOfMonth(currentDate), "yyyy-MM-dd");
       const data = await db.getDailyEntriesRange(user.id, start, end);
       setEntries(data);
-    } catch (error) {
-      console.error('Failed to load entries:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const getEntryForDate = (date: Date): DailyEntry | undefined => {
-    const dateStr = format(date, 'yyyy-MM-dd');
-    return entries.find(e => e.date === dateStr);
-  };
-
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    setCurrentDate((prev) => {
-      const newDate = new Date(prev);
-      newDate.setMonth(prev.getMonth() + (direction === 'next' ? 1 : -1));
-      return newDate;
-    });
+  const getEntryForDate = (date: Date) => {
+    const dateStr = format(date, "yyyy-MM-dd");
+    return entries.find((e) => e.date === dateStr);
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full overflow-x-hidden">
+      
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="zen-title text-3xl mb-2">Monthly View</h1>
+          <h1 className="zen-title text-2xl sm:text-3xl mb-1">Monthly View</h1>
           <p className="text-gray-400 font-gaming uppercase">
-            {format(currentDate, 'MMMM yyyy')}
+            {format(currentDate, "MMMM yyyy")}
           </p>
         </div>
-        <div className="flex items-center gap-4">
+
+        {/* Mobile-friendly buttons */}
+        <div className="flex items-center gap-2 sm:gap-4">
           <button
-            onClick={() => navigateMonth('prev')}
-            className="zen-button-secondary px-4 py-2"
+            onClick={() =>
+              setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))
+            }
+            className="zen-button-secondary px-3 py-2 text-sm"
           >
             ← Prev
           </button>
+
           <button
             onClick={() => setCurrentDate(new Date())}
-            className="zen-button-secondary px-4 py-2"
+            className="zen-button-secondary px-3 py-2 text-sm"
           >
             Today
           </button>
+
           <button
-            onClick={() => navigateMonth('next')}
-            className="zen-button-secondary px-4 py-2"
+            onClick={() =>
+              setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))
+            }
+            className="zen-button-secondary px-3 py-2 text-sm"
           >
             Next →
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
+        
         {/* Calendar Grid */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 w-full overflow-hidden">
           <CalendarGrid
             currentDate={currentDate}
             selectedDate={selectedDate}
@@ -92,8 +92,8 @@ export default function MonthlyView() {
           />
         </div>
 
-        {/* Daily Notes & Analytics */}
-        <div className="space-y-6">
+        {/* Daily Notes */}
+        <div className="space-y-6 w-full">
           <DailyNotes
             date={selectedDate}
             entry={getEntryForDate(selectedDate)}
@@ -102,12 +102,10 @@ export default function MonthlyView() {
         </div>
       </div>
 
-      {/* Monthly Analytics */}
-      <MonthlyAnalytics
-        entries={entries}
-        currentDate={currentDate}
-      />
+      {/* Analytics */}
+      <div className="w-full">
+        <MonthlyAnalytics entries={entries} currentDate={currentDate} />
+      </div>
     </div>
   );
 }
-

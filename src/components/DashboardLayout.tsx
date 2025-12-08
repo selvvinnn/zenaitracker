@@ -11,26 +11,40 @@ import {
   Menu,
   X,
 } from 'lucide-react';
+
 import { calculateLevelProgress, getRankFromXP } from '@/types';
+import { getDailyQuote } from "@/utils/getDailyQuote";   // ✅ IMPORT YOUR QUOTE LOGIC
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { user, signOut } = useAuthStore();
   const location = useLocation();
   const navigate = useNavigate();
 
-  // --- FIX: reactive screen size detection ---
+  // --------------------------
+  // DAILY QUOTE
+  // --------------------------
+  const [dailyQuote, setDailyQuote] = useState("");
+
+  useEffect(() => {
+    if (!user) return;
+
+    const personality = user.personality || "general";
+    const quote = getDailyQuote(personality);
+
+    setDailyQuote(quote);
+  }, [user]);
+
+  // --------------------------
+  // RESPONSIVE SIDEBAR
+  // --------------------------
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
 
   useEffect(() => {
     const handleResize = () => {
-      const wide = window.innerWidth >= 1024;
-      setIsDesktop(wide);
-
-      // Desktop → sidebar always open
-      if (wide) setSidebarOpen(true);
-      // Mobile → sidebar hidden
-      else setSidebarOpen(false);
+      const desktop = window.innerWidth >= 1024;
+      setIsDesktop(desktop);
+      setSidebarOpen(desktop);
     };
 
     window.addEventListener("resize", handleResize);
@@ -39,17 +53,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   if (!user) return null;
 
-  const levelProgress = calculateLevelProgress(
-    user.character.totalXP,
-    user.character.level
-  );
-  const rank = getRankFromXP(user.character.totalXP);
-
   const navItems = [
     { path: '/dashboard/daily', icon: Calendar, label: 'Daily' },
     { path: '/dashboard/monthly', icon: CalendarDays, label: 'Monthly' },
     { path: '/dashboard/yearly', icon: CalendarRange, label: 'Yearly' },
   ];
+
+  const levelProgress = calculateLevelProgress(user.character.totalXP, user.character.level);
+  const rank = getRankFromXP(user.character.totalXP);
 
   return (
     <div className="min-h-screen bg-zen-dark-primary flex">
@@ -57,10 +68,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       {/* MOBILE HEADER */}
       {!isDesktop && (
         <div className="fixed top-0 left-0 right-0 z-50 bg-zen-dark-secondary p-4 border-b border-zen-cyan/30 flex justify-between">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="text-zen-cyan"
-          >
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-zen-cyan">
             {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
           <h1 className="font-gaming text-zen-cyan">ZEN</h1>
@@ -72,17 +80,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <motion.aside
         animate={{ x: sidebarOpen ? 0 : -260 }}
         transition={{ type: "spring", stiffness: 80 }}
-        className={`
-          fixed ${isDesktop ? "static" : ""}
-          top-0 left-0
-          w-64 h-full
-          bg-zen-dark-secondary
-          border-r border-zen-cyan/30
-          z-40 overflow-y-auto
-        `}
+        className={`fixed ${isDesktop ? "static" : ""} top-0 left-0 w-64 h-full bg-zen-dark-secondary border-r border-zen-cyan/30 z-40 overflow-y-auto`}
       >
         <div className={`p-6 ${isDesktop ? "mt-0" : "mt-16"}`}>
-
+          
           {/* PROFILE */}
           <div className="zen-card p-4 mb-6">
             <div className="flex items-center gap-3">
@@ -94,8 +95,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 {user.character.avatar === 'knight' && '🛡️'}
                 {user.character.avatar === 'berserker' && '⚡'}
               </div>
+
               <div>
-                <div className="font-gaming text-zen-cyan">{user.character.name}</div>
+                <div className="font-gaming text-zen-cyan">
+                  {user.character.name}
+                </div>
                 <div className="text-xs text-gray-400 uppercase">
                   Rank {rank} • Lv.{user.character.level}
                 </div>
@@ -121,12 +125,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 <Link
                   key={item.path}
                   to={item.path}
+                  onClick={() => !isDesktop && setSidebarOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg transition ${
                     active
-                      ? 'bg-zen-cyan/20 text-zen-cyan border border-zen-cyan/50'
-                      : 'text-gray-400 hover:text-zen-cyan hover:bg-zen-dark-primary/50'
+                      ? "bg-zen-cyan/20 text-zen-cyan border border-zen-cyan/50"
+                      : "text-gray-400 hover:text-zen-cyan hover:bg-zen-dark-primary/50"
                   }`}
-                  onClick={() => !isDesktop && setSidebarOpen(false)}
                 >
                   <Icon size={20} />
                   {item.label}
@@ -164,23 +168,45 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       </motion.aside>
 
       {/* MAIN CONTENT */}
-      <main
-        className="
-          flex-1
-          p-4 lg:p-8
-          mt-[62px] lg:mt-0
-          lg:ml-64
-        "
+      <main className="flex-1 p-4 lg:p-8 mt-[62px] lg:mt-0 lg:ml-64">
+
+        {/* ⭐ DAILY QUOTE BANNER (Responsive Position) ⭐ */}
+      <div
+        className={`
+          mb-6 
+          w-full 
+          order-first lg:order-none 
+        `}
       >
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="
+            zen-card 
+            px-6 py-4 
+            border border-zen-cyan/40 
+            bg-zen-dark-secondary/60 
+            shadow-lg 
+            rounded-xl 
+            text-center 
+            max-w-3xl 
+            mx-auto
+          "
+        >
+          <p className="text-zen-cyan text-lg font-gaming italic tracking-wide leading-relaxed">
+            "{dailyQuote}"
+          </p>
+        </motion.div>
+      </div>
+
+
         {children}
       </main>
 
       {/* MOBILE OVERLAY */}
       {!isDesktop && sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30"
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="fixed inset-0 bg-black/50 z-30" onClick={() => setSidebarOpen(false)} />
       )}
     </div>
   );

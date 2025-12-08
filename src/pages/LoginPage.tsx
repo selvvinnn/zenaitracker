@@ -11,17 +11,18 @@ export default function LoginPage() {
   const { signIn, loading, user, initialized } = useAuthStore();
   const navigate = useNavigate();
 
-  // Redirect if already logged in
-  useEffect(() => {
-    if (initialized && user) {
-      // Check if user needs to create character
-      if (user.character.name === 'Hunter' && user.character.level === 1 && user.character.totalXP === 0) {
-        navigate('/character', { replace: true });
-      } else {
-        navigate('/dashboard', { replace: true });
-      }
-    }
-  }, [user, initialized, navigate]);
+ useEffect(() => {
+  if (!initialized) return;     // do nothing until hydration finishes
+  if (!user) return;            // do nothing unless actually logged in
+
+  const isDefaultCharacter =
+    user.character?.name === "Hunter" &&
+    user.character?.level === 1 &&
+    user.character?.totalXP === 0;
+
+  if (isDefaultCharacter) navigate("/character", { replace: true });
+  else navigate("/dashboard", { replace: true });
+}, [initialized, user]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

@@ -5,6 +5,7 @@ export interface User {
   character: Character;
   preferences: UserPreferences;
   createdAt: string;
+  personality: string;
 }
 
 export interface Character {

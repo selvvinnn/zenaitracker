@@ -3,39 +3,37 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from 'react-hot-toast';
-import { 
-  AvatarType, 
-  ThemeColor, 
-  Character 
-} from '@/types';
+import { Character } from '@/types';
 import { Sparkles, Zap } from 'lucide-react';
 
-const AVATARS: { type: AvatarType; label: string; icon: string }[] = [
+const AVATARS = [
   { type: 'warrior', label: 'Warrior', icon: '⚔️' },
   { type: 'mage', label: 'Mage', icon: '🔮' },
   { type: 'assassin', label: 'Assassin', icon: '🗡️' },
   { type: 'archer', label: 'Archer', icon: '🏹' },
   { type: 'knight', label: 'Knight', icon: '🛡️' },
   { type: 'berserker', label: 'Berserker', icon: '⚡' },
-];
+] as const;
 
-const THEMES: { color: ThemeColor; label: string; class: string }[] = [
+const THEMES = [
   { color: 'blue', label: 'Azure', class: 'from-blue-500 to-cyan-500' },
   { color: 'purple', label: 'Violet', class: 'from-purple-500 to-pink-500' },
   { color: 'red', label: 'Crimson', class: 'from-red-500 to-orange-500' },
   { color: 'gold', label: 'Golden', class: 'from-yellow-500 to-amber-500' },
   { color: 'green', label: 'Emerald', class: 'from-green-500 to-emerald-500' },
-];
+] as const;
 
 export default function CharacterCreationPage() {
   const { user, updateUser } = useAuthStore();
   const navigate = useNavigate();
+
   const [hunterName, setHunterName] = useState(user?.character?.name || '');
-  const [selectedAvatar, setSelectedAvatar] = useState<AvatarType>(
-    user?.character?.avatar || 'warrior'
-  );
-  const [selectedTheme, setSelectedTheme] = useState<ThemeColor>(
-    user?.character?.theme || 'blue'
+  const [selectedAvatar, setSelectedAvatar] = useState(user?.character?.avatar || 'warrior');
+  const [selectedTheme, setSelectedTheme] = useState(user?.character?.theme || 'blue');
+
+  // NEW → Personality state
+  const [selectedPersonality, setSelectedPersonality] = useState(
+    user?.personality || 'general'
   );
 
   const handleSubmit = async () => {
@@ -52,10 +50,8 @@ export default function CharacterCreationPage() {
       };
 
       await updateUser({
-        character: {
-          ...user!.character,
-          ...updatedCharacter,
-        },
+        character: { ...user!.character, ...updatedCharacter },
+        personality: selectedPersonality,
       });
 
       toast.success('Character created successfully!');
@@ -83,11 +79,12 @@ export default function CharacterCreationPage() {
           <div className="text-center mb-8">
             <motion.div
               animate={{ rotate: [0, 360] }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
               className="inline-block mb-4"
             >
               <Sparkles className="w-12 h-12 text-zen-cyan" />
             </motion.div>
+
             <h1 className="zen-title text-4xl mb-2">CREATE YOUR HUNTER</h1>
             <p className="text-gray-400 font-gaming uppercase tracking-wider">
               Customize Your Character
@@ -95,6 +92,7 @@ export default function CharacterCreationPage() {
           </div>
 
           <div className="space-y-8">
+
             {/* Hunter Name */}
             <div>
               <label className="block text-zen-cyan font-gaming text-lg uppercase mb-3">
@@ -105,9 +103,30 @@ export default function CharacterCreationPage() {
                 value={hunterName}
                 onChange={(e) => setHunterName(e.target.value)}
                 className="zen-input text-xl font-gaming"
-                placeholder="Enter your Hunter name"
                 maxLength={20}
+                placeholder="Enter your Hunter name"
               />
+            </div>
+
+            {/* Personality Selector (NEW) */}
+            <div>
+              <label className="block text-zen-cyan font-gaming text-lg uppercase mb-4">
+                Choose Your Personality Type
+              </label>
+
+              <select
+                className="zen-input font-gaming"
+                value={selectedPersonality}
+                onChange={(e) => setSelectedPersonality(e.target.value)}
+              >
+                <option value="general">General</option>
+                <option value="masculine">Masculine</option>
+                <option value="hustler">Hustler / Money-driven</option>
+                <option value="fitness">Fitness Focused</option>
+                <option value="student">Student</option>
+                <option value="mindfulness">Mindfulness</option>
+                <option value="spiritual">Spiritual</option>
+              </select>
             </div>
 
             {/* Avatar Selection */}
@@ -159,6 +178,7 @@ export default function CharacterCreationPage() {
                     <div className="text-sm font-gaming uppercase text-zen-cyan">
                       {theme.label}
                     </div>
+
                     {selectedTheme === theme.color && (
                       <motion.div
                         initial={{ scale: 0 }}
@@ -173,33 +193,7 @@ export default function CharacterCreationPage() {
               </div>
             </div>
 
-            {/* Character Preview */}
-            <div className="zen-card p-6 border-zen-cyan/50">
-              <h3 className="text-zen-cyan font-gaming text-xl uppercase mb-4">
-                Character Preview
-              </h3>
-              <div className="flex items-center gap-6">
-                <div className="text-6xl">
-                  {AVATARS.find(a => a.type === selectedAvatar)?.icon}
-                </div>
-                <div>
-                  <div className="text-2xl font-gaming text-zen-cyan mb-1">
-                    {hunterName || 'Your Name'}
-                  </div>
-                  <div className="text-sm text-gray-400 uppercase">
-                    Level 1 • Rank E
-                  </div>
-                  <div className="mt-2 flex items-center gap-2">
-                    <span className="text-xs text-gray-500">Theme:</span>
-                    <div className={`w-8 h-8 rounded bg-gradient-to-br ${
-                      THEMES.find(t => t.color === selectedTheme)?.class
-                    }`} />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Submit Button */}
+            {/* Submit */}
             <motion.button
               onClick={handleSubmit}
               whileHover={{ scale: 1.05 }}
@@ -208,10 +202,10 @@ export default function CharacterCreationPage() {
             >
               Begin Your Quest
             </motion.button>
+
           </div>
         </div>
       </motion.div>
     </div>
   );
 }
-

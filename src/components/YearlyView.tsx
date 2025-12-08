@@ -1,165 +1,122 @@
-import { useState } from 'react';
-import { useAuthStore } from '@/store/authStore';
-import { motion } from 'framer-motion';
-import { format } from 'date-fns';
-import { Calendar, TrendingUp, Award } from 'lucide-react';
+import { useState } from "react";
+import { useAuthStore } from "@/store/authStore";
+import { motion } from "framer-motion";
+import { format } from "date-fns";
+import { Calendar, TrendingUp, Award } from "lucide-react";
 
 export default function YearlyView() {
   const { user } = useAuthStore();
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
-  // Generate months for the selected year
   const months = Array.from({ length: 12 }, (_, i) => {
     const date = new Date(selectedYear, i, 1);
     return {
-      date,
-      name: format(date, 'MMMM'),
-      shortName: format(date, 'MMM'),
+      name: format(date, "MMMM"),
+      shortName: format(date, "MMM"),
     };
   });
 
-  // TODO: Load yearly data
   const totalXP = user?.character.totalXP || 0;
   const currentLevel = user?.character.level || 1;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full overflow-x-hidden">
+
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="zen-title text-3xl mb-2">Yearly Overview</h1>
-          <p className="text-gray-400 font-gaming uppercase">
-            {selectedYear} Summary
-          </p>
+          <h1 className="zen-title text-2xl sm:text-3xl mb-1">Yearly Overview</h1>
+          <p className="text-gray-400 font-gaming uppercase">{selectedYear}</p>
         </div>
-        <div className="flex items-center gap-4">
+
+        <div className="flex items-center gap-2 sm:gap-4">
           <button
             onClick={() => setSelectedYear(selectedYear - 1)}
-            className="zen-button-secondary px-4 py-2"
+            className="zen-button-secondary px-3 py-2 text-sm"
           >
             ← {selectedYear - 1}
           </button>
+
           <button
             onClick={() => setSelectedYear(new Date().getFullYear())}
-            className="zen-button-secondary px-4 py-2"
+            className="zen-button-secondary px-3 py-2 text-sm"
           >
             {new Date().getFullYear()}
           </button>
+
           <button
             onClick={() => setSelectedYear(selectedYear + 1)}
-            className="zen-button-secondary px-4 py-2"
+            className="zen-button-secondary px-3 py-2 text-sm"
           >
             {selectedYear + 1} →
           </button>
         </div>
       </div>
 
-      {/* Yearly Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="zen-card p-6"
-        >
-          <div className="flex items-center gap-4">
-            <div className="p-4 bg-zen-cyan/20 rounded-lg">
-              <TrendingUp className="text-zen-cyan" size={32} />
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+        <motion.div className="zen-card p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-zen-cyan/20 rounded-lg">
+              <TrendingUp className="text-zen-cyan" />
             </div>
             <div>
-              <div className="text-sm text-gray-400 font-gaming uppercase mb-1">
-                Total XP Gained
-              </div>
-              <div className="text-3xl font-bold text-zen-cyan font-mono">
-                {totalXP.toLocaleString()}
-              </div>
+              <p className="text-gray-400 text-xs uppercase">Total XP</p>
+              <p className="text-xl text-zen-cyan font-bold">{totalXP}</p>
             </div>
           </div>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="zen-card p-6"
-        >
-          <div className="flex items-center gap-4">
-            <div className="p-4 bg-zen-gold/20 rounded-lg">
-              <Award className="text-zen-gold" size={32} />
+        <motion.div className="zen-card p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-zen-gold/20 rounded-lg">
+              <Award className="text-zen-gold" />
             </div>
             <div>
-              <div className="text-sm text-gray-400 font-gaming uppercase mb-1">
-                Current Level
-              </div>
-              <div className="text-3xl font-bold text-zen-gold font-mono">
-                {currentLevel}
-              </div>
+              <p className="text-gray-400 text-xs uppercase">Level</p>
+              <p className="text-xl text-zen-gold font-bold">{currentLevel}</p>
             </div>
           </div>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="zen-card p-6"
-        >
-          <div className="flex items-center gap-4">
-            <div className="p-4 bg-zen-green/20 rounded-lg">
-              <Calendar className="text-zen-green" size={32} />
+        <motion.div className="zen-card p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-zen-green/20 rounded-lg">
+              <Calendar className="text-zen-green" />
             </div>
             <div>
-              <div className="text-sm text-gray-400 font-gaming uppercase mb-1">
-                Active Days
-              </div>
-              <div className="text-3xl font-bold text-zen-green font-mono">
-                {/* TODO: Calculate active days */}
-                0
-              </div>
+              <p className="text-gray-400 text-xs uppercase">Active Days</p>
+              <p className="text-xl text-zen-green font-bold">0</p>
             </div>
           </div>
         </motion.div>
+
       </div>
 
-      {/* Monthly Grid */}
-      <div className="zen-card p-6">
-        <h2 className="font-gaming text-xl text-zen-cyan uppercase mb-6">
-          Monthly Breakdown
+      {/* Months Grid */}
+      <div className="zen-card p-4">
+        <h2 className="text-zen-cyan text-lg font-gaming uppercase mb-4">
+          Months
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {months.map((month, index) => (
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+          {months.map((month, i) => (
             <motion.div
-              key={month.name}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.05 }}
-              className="zen-card p-4 text-center cursor-pointer hover:border-zen-cyan/50 transition-all"
+              key={i}
+              className="zen-card p-3 text-center hover:border-zen-cyan/40"
             >
-              <div className="text-sm font-gaming text-gray-400 uppercase mb-2">
-                {month.shortName}
-              </div>
-              <div className="text-2xl font-bold text-zen-cyan mb-2">
-                {/* TODO: Show completion percentage */}
-                0%
-              </div>
-              <div className="text-xs text-gray-500">
-                {/* TODO: Show task count */}
-                0 tasks
-              </div>
+              <p className="text-gray-400 text-xs uppercase">{month.shortName}</p>
+              <p className="text-zen-cyan text-xl font-bold">0%</p>
             </motion.div>
           ))}
         </div>
       </div>
 
-      {/* Progress Chart Placeholder */}
-      <div className="zen-card p-6">
-        <h2 className="font-gaming text-xl text-zen-cyan uppercase mb-6">
-          Yearly Progress
-        </h2>
-        <div className="h-64 flex items-center justify-center text-gray-500">
-          <p className="font-gaming uppercase">Yearly Progress Chart (Coming Soon)</p>
-        </div>
+      {/* Chart Placeholder */}
+      <div className="zen-card p-6 text-center text-gray-400">
+        <p>Yearly Progress Chart (Coming Soon)</p>
       </div>
     </div>
   );
 }
-
