@@ -181,6 +181,8 @@ export default function DailyView() {
             completionRate={completionRate}
             streak={0} // TODO: Calculate streak
             totalRewards={totalRewards}
+            hydrationTodayLitres={user?.hydrationTodayLitres || 0}
+            dailyHydrationGoal={user?.dailyHydrationGoal || 2}
           />
         </div>
       </div>

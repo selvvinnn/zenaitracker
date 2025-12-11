@@ -2,6 +2,7 @@ import { useState, useEffect, ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { motion } from 'framer-motion';
+import HydrationReminder from './HydrationReminder';
 import {
   Calendar,
   CalendarDays,
@@ -52,7 +53,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   }, []);
 
   if (!user) return null;
-
+  
   const navItems = [
     { path: '/dashboard/daily', icon: Calendar, label: 'Daily' },
     { path: '/dashboard/monthly', icon: CalendarDays, label: 'Monthly' },
@@ -102,6 +103,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 </div>
                 <div className="text-xs text-gray-400 uppercase">
                   Rank {rank} • Lv.{user.character.level}
+                </div>
+                <div className="text-xs text-gray-400 uppercase mt-1">
+                  💧 Streak: 
+                  <span className="text-zen-cyan ml-1">{user.hydrationStreak} days</span>
                 </div>
               </div>
             </div>
@@ -203,6 +208,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
         {children}
       </main>
+
+      {/* Put reminder at the root so it's visible across pages */}
+      <HydrationReminder />
 
       {/* MOBILE OVERLAY */}
       {!isDesktop && sidebarOpen && (

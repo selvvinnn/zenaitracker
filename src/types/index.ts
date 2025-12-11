@@ -6,6 +6,11 @@ export interface User {
   preferences: UserPreferences;
   createdAt: string;
   personality: string;
+  hydrationStreak?: number;
+  lastHydrationAck: Date | null;
+  hydrationTodayLitres?: number; // litres recorded today
+  dailyHydrationGoal?: number;   // goal in litres (e.g. 2.0)
+  lastHydrationGoalCompleted?: Date | null; // when the goal was last met
 }
 
 export interface Character {
