@@ -310,23 +310,44 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   signUp: async (email, password) => {
     set({ loading: true });
+  
     try {
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      const redirectTo =
+        import.meta.env.PROD
+          ? "https://zenaitracker.netlify.app/login"
+          : "http://localhost:5173/login";
+  
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectTo,
+        },
+      });
+  
       if (error) throw error;
-
-      if (!data.session) throw new Error("EMAIL_CONFIRMATION_REQUIRED");
-
+  
+      // IMPORTANT:
+      // When email confirmation is enabled,
+      // Supabase does NOT return a session immediately
+      if (!data.session) {
+        // This is SUCCESS, not failure
+        return;
+      }
+  
+      // Edge case: email confirmation disabled
       const profile = await fetchOrCreateProfile(data.session.user);
-
+  
       set({
         session: data.session,
         user: mapUserFromDb(profile),
       });
-
+  
     } finally {
       set({ loading: false });
     }
   },
+  
 
   signOut: async () => {
     await supabase.auth.signOut();
